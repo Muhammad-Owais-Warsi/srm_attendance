@@ -1,0 +1,27 @@
+{
+  "name": "srm-get-attendance",
+  "version": "1.0.7",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "attendance": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "eng.traineddata"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "ora": "^8.2.0",
+    "puppeteer": "^24.2.0",
+    "readline-sync": "^1.4.10",
+    "tesseract.js": "^6.0.0"
+  }
+}
