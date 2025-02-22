@@ -20,7 +20,7 @@ async function attendance() {
   
     const spinner = ora("🚀 Waking up the browser...").start();
     const browser = await puppeteer.launch({
-        headless: "new",
+        headless: false,
         defaultViewport: null,
         args: ["--start-maximized"],
     });
@@ -76,20 +76,41 @@ async function attendance() {
     spinner.start("⏳ Waiting... Will it work?");
     await page.waitForNavigation({ waitUntil: "networkidle2" });
 
-    await new Promise((resolve) => {
-        setTimeout(async () => {
-            const currentURL = page.url();  
- 
+    await new Promise(async(resolve) => {
+        const startTime = Date.now();
+        const timeout = 5000; // 5 seconds
+    
+        while (Date.now() - startTime < timeout) { 
+            // Check for error message
+            const errorText = await page.evaluate(() => {
+                const form = document.querySelector("#login_form");
+                if (!form) return "Form not found";
             
-            if (currentURL !== MAIN_PAGE) {
-                spinner.fail("Login Failed. Please try again.");
+                const div = form.querySelector('div[class*="alert"]'); 
+    
+                return div ? div.innerText.trim() : "Div not found";
+            });
+            
+
+            
+    
+            if (errorText) {
+                console.log("\n")
+                console.log("❌", errorText);
+                spinner.stop()
                 await browser.close();
                 return;
             }
     
-
-            resolve();
-        }, 5000); // Wait for 5 seconds before checking the URL
+            // Check if login is successful
+            if (page.url() === MAIN_PAGE) {
+                resolve(); // Success! Exit loop early
+                return;
+            }
+    
+            // Wait 500ms before checking again
+            await new Promise(r => setTimeout(r, 500));
+        }
     });
     
     
