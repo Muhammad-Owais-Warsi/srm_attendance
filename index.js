@@ -15,12 +15,13 @@ const CAPTCHA_IMAGE_PATH = path.join(os.tmpdir(), 'captcha.png');
 const SITE_PATH = "https://sp.srmist.edu.in/srmiststudentportal/students/loginManager/youLogin.jsp"
 const MAIN_PAGE = "https://sp.srmist.edu.in/srmiststudentportal/students/template/HRDSystem.jsp"
 
+let FORM = ""
 
 async function attendance() {
   
     const spinner = ora("🚀 Waking up the browser...").start();
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: "new",
         defaultViewport: null,
         args: ["--start-maximized"],
     });
@@ -63,10 +64,10 @@ async function attendance() {
 
     spinner.start("🖱️ Clicking login... Fingers crossed!");
     await page.evaluate(() => {
-        const form = document.querySelector("form#login_form");
-        if (!form) return;
+        FORM = document.querySelector("form#login_form");
+        if (!FORM) return;
 
-        const buttons = form.querySelectorAll("button, input[type='submit']");
+        const buttons = FORM.querySelectorAll("button, input[type='submit']");
         if (buttons.length > 0) {
             buttons[buttons.length - 1].click(); 
         }
@@ -81,12 +82,17 @@ async function attendance() {
         const timeout = 5000; // 5 seconds
     
         while (Date.now() - startTime < timeout) { 
+
+            if (page.url() === MAIN_PAGE) {
+                resolve(); // Success! Exit loop early
+                return;
+            }
             // Check for error message
             const errorText = await page.evaluate(() => {
-                const form = document.querySelector("#login_form");
-                if (!form) return "Form not found";
+               
+                if (!FORM) return "Form not found";
             
-                const div = form.querySelector('div[class*="alert"]'); 
+                const div = FORM.querySelector('div[class*="alert"]'); 
     
                 return div ? div.innerText.trim() : "Div not found";
             });
@@ -103,10 +109,7 @@ async function attendance() {
             }
     
             // Check if login is successful
-            if (page.url() === MAIN_PAGE) {
-                resolve(); // Success! Exit loop early
-                return;
-            }
+
     
             // Wait 500ms before checking again
             await new Promise(r => setTimeout(r, 500));
