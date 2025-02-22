@@ -89,10 +89,10 @@ async function attendance() {
             }
             // Check for error message
             const errorText = await page.evaluate(() => {
-               
-                if (!FORM) return "Form not found";
+                const form = document.querySelector("form#login_form");
+                if (!form) return "Form not found";
             
-                const div = FORM.querySelector('div[class*="alert"]'); 
+                const div = form.querySelector('div[class*="alert"]'); 
     
                 return div ? div.innerText.trim() : "Div not found";
             });
